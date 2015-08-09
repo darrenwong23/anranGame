@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+  <head>
+    <div>
+    Play with: <button value="Submit" class="buttonAI"> AIBOT</button>
+    Play with: <button value="Submit" class="buttonPlayer"> Real Players</button>
+
+    <b><p id='status'> </p></b>
+
+    <div class='pile'>
+
+    <p id="pileDisplay"> </p>
+
+    </div>
+
+    <form>
+      Which Pile:<br>
+      <input type="text" name="pile" value="0" id="pile">
+      <br>
+      Number of Beans:<br>
+      <input type="text" name="number" value="0" id="beans">
+    </form>
+  
+    <p id="whichPlayer"> </p>
+    <button value="Submit" class="button" disabled> Submit</button>
+
+
+
+  </div>
+
+  <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+
+
+
+  <script>
+    var socket = io();
+
+    socket.on('connect', function(){
+      socket.emit('storeName', prompt("What's your name?"));
+    });
+
+    socket.on('playerDisconnect', function(message){
+      $("#status").text("Your opponent has disconnected. Refresh to start a new game");
+    });
+
+    socket.on('updateRoom', function(message, player1){
+      $("#status").text("Player " + message[0] + " vs Player " + message[1]);
+
+      if(socket.io.engine.id === player1) {
+        $("#whichPlayer").text("It's your turn");
+        $(".button").prop("disabled", false);
+
+      }
+      else {
+        $("#whichPlayer").text("Waiting for your opponent to make a move.");
+      };
+
+      socket.on('updateGameSet', function(gameSet){
+        // $("#pileDisplay").text(gameSet);
+        populateTable(gameSet);
+      });
+
+
+    });
+
+    socket.on('updatePlayer', function(player){
+      if(socket.io.engine.id === player) {
+        $("#whichPlayer").text("It's your turn");
+        $(".button").prop("disabled", false);
+      } else {
+        $("#whichPlayer").text("Waiting for your opponent to make a move.");
+        $(".button").prop("disabled", true);
+
+      }
+    });
+
+    socket.on('updateMoves', function(player, pile, beans){
+      $('body').append("<p>Player " + player + " took " + beans + " beans from pile " + pile + "</p>");
+
+    });
+
+    socket.on('winner', function(player){
+      $(".button").prop("disabled", true);
+      if(socket.io.engine.id === player) {
+        $('body').append("<p style='color:red'> YOU WON!!! Refresh page to start again </p>");
+      }else {
+        $('body').append("<p style='color:red'> YOU LOST :( Refresh page to start again</p>");
+      }
+    })
+
+    socket.on('isValidMove', function(isValid) {
+      var pile = $("#pile")[0]["value"];
+      var beans = $("#beans")[0]["value"];
+
+      if(isValid)
+        socket.emit('submitMove', pile,beans);
+      else
+        alert('pls enter valid move');
+    })
+
+    var populateTable = function(gameSet) {
+        $("#pileDisplay").empty();
+
+         $("#pileDisplay").append('<u> Pile: Beans </u>');
+
+      for(var i = 0; i< gameSet.length; i++) {
+        $("#pileDisplay").append("<p style='margin-bottom: 1px;margin-top: 1px;'>" + i + ": " + gameSet[i]+"</p>");
+      }
+    }
+
+    $(document).ready(function(){
+      $('.button').click(function(e) {
+          e.preventDefault();
+          var pile = $("#pile")[0]["value"];
+          var beans = $("#beans")[0]["value"];
+
+          socket.emit('validMove', pile, beans);
+
+      }); 
+
+      $('.buttonAI').click(function(e) {
+          e.preventDefault();
+          $(".buttonAI").prop("disabled", true);
+          $(".buttonPlayer").prop("disabled", true);
+
+          socket.emit('vsAI');
+      }); 
+      $('.buttonPlayer').click(function(e) {
+          e.preventDefault();
+          $(".buttonAI").prop("disabled", true);
+          $(".buttonPlayer").prop("disabled", true);
+
+          $("#status").text("Waiting for new Player");
+
+          socket.emit('adduser');
+      }); 
+    });
+  </script>
+  </body>
+</html>
