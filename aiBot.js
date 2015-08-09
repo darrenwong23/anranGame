@@ -1,7 +1,7 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io-client');
-socket = io.connect("http://localhost:3000");
+socket = io.connect("http://anrangame.herokuapp.com/");
 
 socket.on('connect', function(){
 	socket.emit('ai');
@@ -38,6 +38,6 @@ var aiMakeMove = function( gameSet) {
 
 }
 
-http.listen(4000, function(){
+http.listen(process.env.PORT || 4000, function(){
   console.log('listening on *:4000');
 });
