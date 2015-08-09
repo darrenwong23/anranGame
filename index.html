@@ -92,7 +92,7 @@
     socket.on('isValidMove', function(isValid) {
       var pile = $("#pile")[0]["value"];
       var beans = $("#beans")[0]["value"];
-
+      console.log(isValid);
       if(isValid)
         socket.emit('submitMove', pile,beans);
       else
