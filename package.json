@@ -1,7 +1,10 @@
 {
-  "name": "anran game",
+  "name": "anranGame",
   "version": "0.0.1",
   "description": "anran game app",
+  "engines": {
+    "node": "0.10.x"
+  },
   "dependencies": {
     "express": "^4.13.3",
     "socket.io": "^1.3.6",
