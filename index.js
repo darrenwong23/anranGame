@@ -100,7 +100,7 @@ io.on('connection', function(socket){
 		var game = roomList[socket.room].game;
 		var isValid = game.isValidMove(pile,beans);
 
-		io.sockets.in(socket.room).emit('isValidMove', isValid);
+		socket.emit('isValidMove', isValid);
 	});
 
 	socket.on('storeName', function(username){
