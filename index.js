@@ -3,8 +3,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var Anran = require('./anranGame.js');
 
-http.listen(3000, function(){
-  console.log('listening on *:3000');
+http.listen(process.env.PORT, function(){
+  console.log('listening on *:process.env.PORT');
 });
 
 app.get('/', function(req, res){
