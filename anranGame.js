@@ -56,12 +56,13 @@ Game.prototype.makeMove = function(pileIndex, number) {
 		return number;
 
 	}
-
-
 }
 
 Game.prototype.isValidMove = function(pileIndex, number) {
-	if(pileIndex >= this.gameSet.length || number <= 0) return false;
+	if(pileIndex >= this.gameSet.length || number <= 0) {
+		return false;
+	}
+	if(this.gameSet[pileIndex] === 0) return false;
 	return true;
 };
 

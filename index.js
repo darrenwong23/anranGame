@@ -19,7 +19,6 @@ var ai;
 
 
 io.on('connection', function(socket){
-	console.log("new connection");
 
 	socket.on('ai', function(){
 		console.log("ai detected");
@@ -29,10 +28,7 @@ io.on('connection', function(socket){
 
 	socket.on('adduser', function(){
 
-		// store the username in the socket session for this client
-		// socket.username = username;
-
-
+		//find available room to join
 		if(roomsToJoin.length === 0 ) {
 
 			socket.room = ++room;
@@ -51,19 +47,18 @@ io.on('connection', function(socket){
 			var player1 = io.sockets.connected[roomList[socket.room].player1];
 			roomList[socket.room].game = new Anran(player1.id, socket.id);
 			io.sockets.in(socket.room).emit('updateRoom', [player1.username, socket.username], player1.id);
-
 			io.sockets.in(socket.room).emit('updateGameSet', roomList[socket.room].game.getGameSet());
 		};
 
 	});
 
 	socket.on('submitMove', function(pile,beans) {
-		console.log("move submitted");
-
-		//get game instance
-
 		var game = roomList[socket.room].game;
+
+		//make game move
 		beans = game.makeMove(pile, beans);
+
+		//switch player's turn
 		var nextPlayer = game.switchPlayersTurn();
 
 		io.sockets.in(socket.room).emit('updateMoves', socket.username, pile, beans);
@@ -84,9 +79,8 @@ io.on('connection', function(socket){
 		roomList[socket.room].player1 = socket.id;
 		
    	 	ai.username = 'AIBOT';
-   	 	ai.join(socket.room);
-
    	 	ai.room = socket.room;
+   	 	ai.join(socket.room);
 		roomList[socket.room].player2 = ai.id;
 		roomList[socket.room].game = new Anran(socket.id, ai.id);
 
@@ -98,8 +92,9 @@ io.on('connection', function(socket){
 
 	socket.on('validMove', function(pile,beans) {
 		var game = roomList[socket.room].game;
+		//check whether move is valid
 		var isValid = game.isValidMove(pile,beans);
-
+		//tell client whether move was valid
 		socket.emit('isValidMove', isValid);
 	});
 
@@ -110,6 +105,7 @@ io.on('connection', function(socket){
 
 	socket.on('disconnect',function(){
 		if(io.sockets.adapter.rooms[socket.room]=== undefined) {
+			//remove room from roomsToJoin list
 	   	 	roomsToJoin.splice(roomsToJoin.indexOf(socket.room), 1);
 		}else {
 			socket.broadcast.to(socket.room).emit('playerDisconnect', socket.username + 'has disconnected. Refresh to start a new game');
